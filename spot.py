@@ -1,65 +1,134 @@
-# import cv2
+
+# # from PIL import Image
+
+# # # Define the color ranges
+# # color_ranges = {
+# #     'Black': ((0, 0, 0), (85, 85, 85)),
+# #     'Brown': ((86, 86, 86), (170, 170, 170)),
+# #     'Pink': ((171, 171, 171), (255, 255, 255))
+# # }
+
+# # # Load the image
+# # image_path = 'E:/AI/Extra/gitCheck/main/muz.jpg'  # Replace this with the path to your image
+# # image = Image.open(image_path)
+# # pixel_data = image.load()
+
+# # # Function to check if a pixel falls within a specified range
+# # def is_within_range(pixel, color_range):
+# #     return all(color_range[0][i] <= pixel[i] <= color_range[1][i] for i in range(3))
+
+# # # Count the number of pixels within each color range
+# # color_counts = {color_name: 0 for color_name in color_ranges}
+
+# # # Get width and height of the image
+# # width, height = image.size
+
+# # # Iterate through pixels and count the occurrence of each color
+# # for y in range(height):
+# #     for x in range(width):
+# #         pixel = pixel_data[x, y]
+# #         for color_name, rgb_range in color_ranges.items():
+# #             if is_within_range(pixel, rgb_range):
+# #                 color_counts[color_name] += 1
+# #                 break  # No need to check other color ranges if this pixel matches one
+
+# # # Find the dominant color(s)
+# # dominant_colors = [color_name for color_name, count in color_counts.items() if count == max(color_counts.values())]
+
+# # # Print the dominant color(s)
+# # if len(dominant_colors) == 1:
+# #     print(f"The image is primarily in {dominant_colors[0]} color.")
+# # else:
+# #     print(f"The image contains multiple dominant colors: {', '.join(dominant_colors)}")
+
+# # ---------------------------------------------------------------------------------------------------
+
+
+# # ---------------=============================================================-----------------------
 # import numpy as np
+# from PIL import Image
+# from sklearn.cluster import KMeans
 
 # # Load the image
-# image = cv2.imread('E:/AI/Extra/gitCheck/main/dis1_1.png')
+# # image_path = 'E:/AI/Extra/gitCheck/main/c2_1.jpg'  # Replace this with the path to your image
+# image_path = 'E:/AI/ProductionData/7cattles/c6/c6_17.jpg'
+# image = Image.open(image_path)
 
-# # Convert BGR to HSV color space
-# hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# # Convert the image to a NumPy array
+# img_array = np.array(image)
 
-# # Define the lower and upper bounds for the color you want to detect (e.g., red)
-# lower_color = np.array([0, 100, 100])  # Lower HSV values for red
-# upper_color = np.array([10, 255, 255])  # Upper HSV values for red
+# # Flatten the array to fit the KMeans model
+# reshaped_array = img_array.reshape(-1, 3)
 
-# # Create a mask to isolate the specified color range
-# mask = cv2.inRange(hsv, lower_color, upper_color)
+# # Define the color ranges
+# color_ranges = {
+#     'Black': ((0, 0, 0), (85, 85, 85)),
+#     'Brown': ((86, 86, 86), (170, 170, 170)),
+#     'Pink': ((171, 171, 171), (255, 255, 255))
+# }
 
-# # Find contours in the mask
-# contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+# # Define the number of colors you want to detect with KMeans
+# num_colors = 5  # Adjust this number as needed
 
-# # Draw the detected contours on the original image
-# for contour in contours:
-#     area = cv2.contourArea(contour)
-#     if area > 100:  # To filter out small areas (adjust as needed)
-#         cv2.drawContours(image, [contour], -1, (0, 255, 0), 2)  # Draw contours in green
+# # Apply KMeans clustering to the image pixels
+# kmeans = KMeans(n_clusters=num_colors, random_state=42)
+# kmeans.fit(reshaped_array)
 
-# # Display the image with detected spots
-# cv2.imshow('Detected Spots', image)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
-import cv2
+# # Retrieve the cluster centers (representative colors)
+# kmeans_colors = kmeans.cluster_centers_.astype(int)
+
+# # Initialize a set to hold detected color names
+# detected_colors = set()
+
+# # Map KMeans colors to defined color ranges and identify the colors found in the image
+# for color in kmeans_colors:
+#     for color_name, (lower, upper) in color_ranges.items():
+#         if all(lower[i] <= color[i] <= upper[i] for i in range(3)):
+#             detected_colors.add(color_name)
+#             break
+
+# # Print the colors found in the image within the specified ranges
+# print("Colors found in the image within the specified ranges:")
+# for color in detected_colors:
+#     print(color)
+# ==================================================================================================================
+
+
+
+from PIL import Image
 import numpy as np
 
 # Load the image
-image = cv2.imread('E:/AI/Extra/gitCheck/main/dis1_1.png')
+image_path = 'E:/AI/Extra/gitCheck/main/c1_2.jpg'  # Replace this with the path to your image
+image = Image.open(image_path)
 
-# Convert the image to HSV color space
-hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+# Convert the image to a NumPy array
+img_array = np.array(image)
 
-# Define lower and upper bounds for the colors you want to detect (example: red and green)
-lower_red = np.array([0, 100, 100])
-upper_red = np.array([10, 255, 255])
+# Define the color ranges
+color_ranges = {
+    'Black': ((0, 0, 0), (85, 85, 85)),
+    'Brown': ((86, 86, 86), (170, 170, 170)),
+    'Pink': ((171, 171, 171), (255, 255, 255))
+}
 
-lower_green = np.array([40, 40, 40])
-upper_green = np.array([80, 255, 255])
+# Initialize counts for each color
+color_counts = {color: 0 for color in color_ranges}
 
-# Create masks for the specified color ranges
-mask_red = cv2.inRange(hsv, lower_red, upper_red)
-mask_green = cv2.inRange(hsv, lower_green, upper_green)
+# Iterate through each pixel and count colors within ranges
+for y in range(img_array.shape[0]):
+    for x in range(img_array.shape[1]):
+        pixel = img_array[y, x]
+        for color, (lower, upper) in color_ranges.items():
+            if all(lower[i] <= pixel[i] <= upper[i] for i in range(3)):
+                color_counts[color] += 1
+                break  # No need to check other color ranges if this pixel matches one
 
-# Combine masks to get the regions with the specified colors
-result = cv2.bitwise_or(mask_red, mask_green)  # Add more masks as needed
+# Find the dominant color(s)
+dominant_colors = [color for color, count in color_counts.items() if count == max(color_counts.values())]
 
-# Find contours of the detected regions
-contours, _ = cv2.findContours(result, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-# Draw contours on the original image
-for contour in contours:
-    area = cv2.contourArea(contour)
-    if area > 100:  # Filter out small areas (adjust as needed)
-        cv2.drawContours(image, [contour], -1, (0, 255, 0), 2)  # Draw contours in green
-
-# Display the image with detected regions of different colors
-cv2.imshow('Detected Colors', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# Print the dominant color(s)
+if len(dominant_colors) == 1:
+    print(f"The dominant color of the image is: {dominant_colors[0]}")
+else:
+    print(f"The dominant colors of the image are: {', '.join(dominant_colors)}")

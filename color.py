@@ -37,13 +37,13 @@ import cv2
 import numpy as np
 
 # Load the image
-image = cv2.imread('E:/AI/Extra/gitCheck/main/dis1_1.png')
+image = cv2.imread('E:/AI/Extra/gitCheck/main/realdata2/co93_1.jpg')
 
 # Define the coordinates of the pixel you want to sample
 # x, y = 650, 560
 # x, y = 150, 250  c1_568
-x , y  = 80 , 140   # dis1_1.png
-x , y  = 
+# x , y  = 80 , 140   # dis1_1.png
+x , y  =  500 , 750
 
 
 # Get the BGR color of the specified pixel
