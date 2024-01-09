@@ -1,29 +1,49 @@
-from kivy.app import App
-from kivy.uix.button import Button
-from kivy.uix.camera import Camera
-from kivy.uix.boxlayout import BoxLayout
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QMessageBox
+from PyQt5.QtMultimediaWidgets import QCameraViewfinder
+from PyQt5.QtMultimedia import QCamera, QCameraInfo
+from PyQt5.QtCore import Qt
 
+class CameraApp(QWidget):
+    def __init__(self):
+        super().__init__()
 
-class CameraApp(App):
-    def build(self):
-        layout = BoxLayout(orientation='vertical')
+        self.camera = QCamera()
+        self.viewfinder = QCameraViewfinder()
+        self.camera.setViewfinder(self.viewfinder)
+        self.camera.setCaptureMode(QCamera.CaptureStillImage)
 
-        self.camera = Camera(index=0, resolution=(640, 480), play=True)
+        # Create a label
+        self.label = QLabel("Hello, World!", self)
+        self.label.setAlignment(Qt.AlignCenter)
 
-        # self.camera = Camera(resolution=(640, 480), play=True)
-        layout.add_widget(self.camera)
+        # Create a button to open the camera
+        self.camera_button = QPushButton("Open Camera", self)
+        self.camera_button.clicked.connect(self.on_camera_button_clicked) 
 
-        button = Button(text="Take Picture")
-        button.bind(on_press=self.take_picture)
-        layout.add_widget(button)
+        # Set up the layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+        layout.addWidget(self.camera_button)
+        layout.addWidget(self.viewfinder)
+        self.setLayout(layout)
 
-        return layout
+    # Function to handle the camera button click event
+    def on_camera_button_clicked(self):
+        cameras = QCameraInfo.availableCameras()
+        if cameras:
+            self.camera.setCamera(cameras[0])
+            self.camera.start()
+        else:
+            QMessageBox.warning(self, "No Camera", "No camera available on this device!")
 
-    def take_picture(self, instance):
-        # Capture and save the picture here
-        self.camera.export_to_png("captured_image.png")
-        print("Picture taken and saved as captured_image.png")
+if __name__ == "__main__":
+    # Create the application instance
+    app = QApplication(sys.argv)
 
+    # Create and show the main window
+    window = CameraApp()
+    window.show()
 
-if __name__ == '__main__':
-    CameraApp().run()
+    # Start the event loop
+    sys.exit(app.exec_())

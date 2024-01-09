@@ -99,7 +99,7 @@ from PIL import Image
 import numpy as np
 
 # Load the image
-image_path = 'E:/AI/Extra/gitCheck/main/c1_2.jpg'  # Replace this with the path to your image
+image_path = 'E:/AI/Extra/gitCheck/main/c5_81.jpg'  # Replace this with the path to your image
 image = Image.open(image_path)
 
 # Convert the image to a NumPy array
