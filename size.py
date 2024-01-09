@@ -8,6 +8,7 @@ image = cv2.imread('E:/AI/Extra/gitCheck/main/realdata2/co93_1.jpg')
 # Define the coordinates of the pixel you want to sample
 x, y = 500, 750
 
+
 # Get the BGR color of the specified pixel
 pixel_color = image[y, x]
 
