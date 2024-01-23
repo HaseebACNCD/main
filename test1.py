@@ -94,7 +94,7 @@
 from PIL import Image
 
 # Load the image
-image_path = 'E:/AI/Extra/gitCheck/main/c5_81.jpg'   # Replace this with the path to your image
+image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co94_1c.jpg'   # Replace this with the path to your image
 img = Image.open(image_path)
 
 # Get the width and height of the image

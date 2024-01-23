@@ -99,7 +99,7 @@ from PIL import Image
 import numpy as np
 
 # Load the image
-image_path = 'E:/AI/Extra/gitCheck/main/c5_81.jpg'  # Replace this with the path to your image
+image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co94_1c.jpg'  # Replace this with the path to your image
 image = Image.open(image_path)
 
 # Convert the image to a NumPy array
@@ -107,8 +107,8 @@ img_array = np.array(image)
 
 # Define the color ranges
 color_ranges = {
-    'Black': ((0, 0, 0), (85, 85, 85)),
-    'Brown': ((86, 86, 86), (170, 170, 170)),
+    'Black': ((0, 0, 0), (95, 95, 95)),
+    'Brown': ((96, 96, 96), (170, 170, 170)),
     'Pink': ((171, 171, 171), (255, 255, 255))
 }
 
