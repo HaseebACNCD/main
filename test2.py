@@ -3,15 +3,13 @@ import cv2
 import os
 import numpy as np
 
-
-
+# colour of nose detect here
 def color_detect(image_path):
     # Load the image
     image = cv2.imread(image_path)
 
     # Define the coordinates of the pixel you want to sample
     x, y = 200, 250
-
 
     # Get the BGR color of the specified pixel
     pixel_color = image[y, x]
@@ -52,7 +50,7 @@ def color_detect(image_path):
 
 
 
-# 
+# the code change the muzzle into edge patterns
 def edge_detect(image_path, destination_folder):
     try:
         # Specify the filename of the image you want to process
@@ -76,69 +74,93 @@ def edge_detect(image_path, destination_folder):
         # Save the edge-detected image to the destination folder    
         cv2.imwrite(destination_image_path, edges)
 
-        print("Edge detection complete. Edge-detected image is saved in:", destination_folder)
+        # print("Edge detection complete. Edge-detected image is saved in:", destination_folder)
         return destination_image_path
 
     except Exception as e:
         print(f"Error: {e}")
         return None
 
-image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co88_1c.jpg'
-destination_folder = r'E:\AI\Extra\gitCheck\main\destination_folder/'
-color_result = color_detect(image_path)
-edge_detected = edge_detect(image_path,destination_folder)
+
+# pattern matching algorithm
+
+# pattern matching algorithm
+def match_pattern_in_folders(root_directory, destination_folder, threshold=0.85):
+    # List to store matched image paths
+    matched_images = []
+
+    # Iterate through images in the template directory
+    for template_filename in os.listdir(destination_folder):
+        if template_filename.endswith(('.jpg', '.jpeg', '.png')):  # Adjust file extensions as needed
+            template_path = os.path.join(destination_folder, template_filename)
+
+            # Read the template image
+            template = cv2.imread(template_path)
+
+            if template is not None:
+                # Convert the template to grayscale
+                template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+
+                # Iterate through folders in the root directory
+                for folder_name in os.listdir(root_directory):
+                    folder_path = os.path.join(root_directory, folder_name)
+
+                    if os.path.isdir(folder_path):
+                        # Iterate through images in the folder
+                        for filename in os.listdir(folder_path):
+                            if filename.endswith(('.jpg', '.jpeg', '.png')):  # Adjust file extensions as needed
+                                image_path = os.path.join(folder_path, filename)
+
+                                # Read the main image
+                                main_image = cv2.imread(image_path)
+
+                                if main_image is not None:
+                                    # Resize the template to match the dimensions of the main image
+                                    template_resized = cv2.resize(template_gray, (main_image.shape[1], main_image.shape[0]))
+
+                                    # Convert the main image to grayscale
+                                    main_gray = cv2.cvtColor(main_image, cv2.COLOR_BGR2GRAY)
+
+                                    # Match the resized template using cv2.matchTemplate
+                                    result = cv2.matchTemplate(main_gray, template_resized, cv2.TM_CCOEFF_NORMED)
+
+                                    # Get the maximum correlation coefficient
+                                    max_val = np.max(result)
+
+                                    # If match is found above the threshold, store the matched image path
+                                    if max_val >= threshold:
+                                        matched_images.append(image_path)
+                                        print(f"Pattern matched in folder: {folder_name} (Image: {filename}, Match Percentage: {max_val * 100}%)")
+                                        
+
+    # Check if there are matched images
+    if not matched_images:
+        print("No matching images found in the specified folders.")
+
+    # Return the list of matched image paths
+    return matched_images
+def remove_folder(destination_folder):
+# Get a list of all files in the folder
+    files = os.listdir(destination_folder)
+
+# Iterate through the list and remove each file
+    for file in files:
+        file_path = os.path.join(destination_folder, file)
+        os.remove(file_path)
+        return print("file deleted")
 
 
+def main():
+    image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co88_2c.jpg'
+    destination_folder = r'E:\AI\Extra\gitCheck\main\testfolder/'
+    root_directory = r"E:\AI\Extra\gitCheck\main\muzzles\destination_folder/"
+    color_result = color_detect(image_path)
+    edge_detected = edge_detect(image_path,destination_folder)
+    match_pattern_in_folders(root_directory,destination_folder)
+    remove_folder(destination_folder)
 
-# import math
-# import cv2
-# import os
-# import numpy as np
 
-# def color_detect(image_path):
-#     try:
-#         # Load the image
-#         image = cv2.imread(image_path)
-
-#         if image is None:
-#             raise Exception(f"Error: Unable to read the image at '{image_path}'")
-
-#         # Rest of your code...
-#         return print("Color detection complete")
-
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return None
-
-# def edge_detect(image_path):
-#     try:
-#         destination_folder = r'E:\AI\Extra\gitCheck\main\destination_folder/'
-
-#         # Load the image
-#         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-
-#         if image is None:
-#             raise Exception(f"Error: Unable to read the image at '{image_path}'")
-
-#         # Rest of your edge detection code...
-
-#         # Construct the full path to the destination image
-#         destination_image_path = os.path.join(destination_folder, os.path.basename(image_path))
-
-#         # Save the edge-detected image to the destination folder
-#         cv2.imwrite(destination_image_path, edges)
-
-#         print("Edge detection complete. Edge-detected image is saved in:", destination_folder)
-#         return destination_image_path
-
-#     except Exception as e:
-#         print(f"Error: {e}")
-#         return None
-
-# image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co88_3c.jpg'
-# color_result = color_detect(image_path)
-
-# if color_result is not None:
-#     edge_result = edge_detect(image_path)
-#     if edge_result is not None:
-#         print(f"Edge-detected image saved at: {edge_result}")
+main()
+# Black =  ["co88","co89","co90"]
+# Brown = ["co91","co92"]
+# Pink = ["co93","co94"]
