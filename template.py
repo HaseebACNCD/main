@@ -43,12 +43,8 @@ def match_pattern_in_folders(root_directory, template_path, threshold=0.85):
                         if max_val >= threshold:
                             print(f"Pattern matched in folder: {folder_name} (Image: {filename}, Match Percentage: {max_val * 100}%)")
 
-                        else:
-                            print('no match found')
-
 # Example usage
-# root_directory = r'E:\AI\Extra\gitCheck\main\muzzles\destination_folder/'  # Replace with the actual path
-root_directory = r'E:\AI\Extra\gitCheck\main\noseDist/'  # Replace with the actual path
-template_path = r'E:\AI\Extra\gitCheck\main\noseDist\extra/co93_11.jpg'  # Replace with the actual path
+root_directory = r'E:\AI\Extra\gitCheck\main\muzzles\destination_folder/'  # Replace with the actual path
+template_path = r'E:\AI\Extra\gitCheck\main\destination_folder/co94_1c.jpg'  # Replace with the actual path
 
 match_pattern_in_folders(root_directory, template_path)
