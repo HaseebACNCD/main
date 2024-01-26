@@ -91,40 +91,112 @@
 # ------------------------------------------------------------------------------------------------
 
 
-from PIL import Image
 
-# Load the image
-image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co94_1c.jpg'   # Replace this with the path to your image
-img = Image.open(image_path)
+import os
+import numpy as np
+import cv2
+import math
 
-# Get the width and height of the image
-width, height = img.size
+# DETECTING COLOUR FROM THE IMAGE
+def color_detect(image_path):
+    # Load the image
+    image = cv2.imread(image_path)
 
-# Create a set to store unique colors
-unique_colors = set()
+    # Check if the image is loaded successfully
+    if image is None:
+        print(f"Error: Unable to load image at {image_path}")
+        return None
 
-# Iterate through each pixel to collect unique colors
-for x in range(width):
-    for y in range(height):
-        pixel_color = img.getpixel((x, y))
-        unique_colors.add(pixel_color)
+    # Define the coordinates of the pixel you want to sample
+    x, y = 200, 250
 
-# Count the number of unique colors
-num_unique_colors = len(unique_colors)
-print(f"Number of unique colors in the image: {num_unique_colors}")
+    # Get the BGR color of the specified pixel
+    pixel_color = image[y, x]
 
-# Define the coordinates of the region (left, upper, right, lower)
-# These coordinates represent the bounding box of the color patch
-patch_coordinates = (100, 100, 200, 200)  # Adjust these coordinates as needed
+    # Convert BGR to RGB
+    rgb_color = (pixel_color[2], pixel_color[1], pixel_color[0])
 
-# Crop the image to the specified patch coordinates
-color_patch = img.crop(patch_coordinates)
+    # Define the ranges for different colors
+    color_ranges = {
+        'Black': ((0, 0, 0), (85, 85, 85)),
+        'Brown': ((86, 86, 86), (170, 170, 170)),
+        'Pink': ((171, 171, 171), (255, 255, 255))
+    }
 
-# Show the color patch (optional)
-color_patch.show()
+    # Function to calculate Euclidean distance between two points in 3D space
+    def euclidean_distance(point1, point2):
+        return math.sqrt(sum((x - y) ** 2 for x, y in zip(point1, point2)))
 
-# Get the average color of the patch
-patch_color = color_patch.getpixel((0, 0))  # Assuming the patch is 1 pixel; adjust if different
-print(f"Color of the patch: {patch_color}")
+    # Initialize variables to track closest color and distance
+    closest_color = None
+    closest_distance = float('inf')
 
+    # Find the closest color
+    for color, (lower, upper) in color_ranges.items():
+        # Calculate the center of the color range
+        center = [(lower[i] + upper[i]) / 2 for i in range(3)]
+        # Calculate the distance between the value and the center of the color range
+        distance = euclidean_distance(rgb_color, center)
+        # Update closest color if this color is closer
+        if distance < closest_distance:
+            closest_distance = distance
+            closest_color = color
 
+    return closest_color  # Return the detected color instead of printing
+
+# Define the colors dictionary
+colors = {
+    "Black": ["co89", "co88", "co87"],
+    "Brown": ["co90", "co91", "co92"],
+    "Pink": ["co93", "co94", "co95"]
+}
+
+def match_pattern_in_folders(root_directory, color_system, threshold=0.85, template_path=None):
+    # Get the detected color for the template
+    detected_color = color_detect(template_path)  # Pass the template_path here
+
+    if detected_color is None or detected_color not in color_system:
+        print("Detected color not found in the color system.")
+        return
+
+    # Get the folders associated with the detected color
+    color_folders = color_system[detected_color]
+
+    # Iterate through folders in the root directory
+    for folder_name in os.listdir(root_directory):
+        folder_path = os.path.join(root_directory, folder_name)
+
+        if os.path.isdir(folder_path) and folder_name in color_folders:
+            # Iterate through images in the folder
+            for filename in os.listdir(folder_path):
+                if filename.endswith(('.jpg', '.jpeg', '.png')):  # Adjust file extensions as needed
+                    image_path = os.path.join(folder_path, filename)
+
+                    # Read the main image
+                    main_image = cv2.imread(image_path)
+
+                    if main_image is not None:
+                        # Resize the template to match the dimensions of the main image
+                        template_resized = cv2.resize(template_gray, (main_image.shape[1], main_image.shape[0]))
+
+                        # Convert the main image to grayscale
+                        main_gray = cv2.cvtColor(main_image, cv2.COLOR_BGR2GRAY)
+
+                        # Match the resized template using cv2.matchTemplate
+                        result = cv2.matchTemplate(main_gray, template_resized, cv2.TM_CCOEFF_NORMED)
+
+                        # Get the maximum correlation coefficient
+                        max_val = np.max(result)
+
+                        # If match is found above the threshold, print the folder name
+                        if max_val >= threshold:
+                            print(f"Pattern matched in folder: {folder_name} (Image: {filename}, Match Percentage: {max_val * 100}%)")
+
+# Example usage
+image_path = r'E:/AI/Extra/gitCheck/main/muzzles/co88_1c.jpg'
+root_directory = r'E:/AI/Extra/gitCheck/main/muzzles/destination_folder/'  # Use consistent slashes
+template_path = r'E:/AI/Extra/gitCheck/main/muzzles/co93_1c.jpg'  # Use consistent slashes
+detected_color = color_detect(image_path)
+if detected_color:
+    print(f"Detected Color: {detected_color}")
+    match_pattern_in_folders(root_directory, colors, template_path=template_path)

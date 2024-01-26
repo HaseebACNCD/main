@@ -1,11 +1,11 @@
+import math
+import cv2
 import os
 import numpy as np
-import cv2 
-import math
 
 
 
-# colour of nose detect here
+# DETECTING COLOUR FROM THE IMAGE 
 def color_detect(image_path):
     # Load the image
     image = cv2.imread(image_path)
@@ -46,13 +46,14 @@ def color_detect(image_path):
             closest_distance = distance
             closest_color = color
 
-    # Return the closest color instead of printing it
+    # print(f"The closest color to the rgb_color {rgb_color} is {closest_color}.")
+    
     return print(closest_color)
 
 
 
 
-# the code change the muzzle into edge patterns
+# MAKING EDGE DETECTING FILES
 def edge_detect(image_path, destination_folder):
     try:
         # Specify the filename of the image you want to process
@@ -84,10 +85,9 @@ def edge_detect(image_path, destination_folder):
         return None
 
 
-# pattern matching algorithm
 
 # pattern matching algorithm
-def match_pattern_in_folders(root_directory, destination_folder, threshold=0.85):
+def match_pattern_and_remove(root_directory, destination_folder, threshold=0.85):
     # List to store matched image paths
     matched_images = []
 
@@ -129,40 +129,34 @@ def match_pattern_in_folders(root_directory, destination_folder, threshold=0.85)
                                     # Get the maximum correlation coefficient
                                     max_val = np.max(result)
 
-                                    # If match is found above the threshold, store the matched image path
+                                    # If match is found above the threshold, remove the matched image
                                     if max_val >= threshold:
                                         matched_images.append(image_path)
-                                        print(f"Pattern matched in folder: {folder_name} (Image: {filename}, Match Percentage: {max_val * 100}%)")
-                                        
+                                        print(f"Pattern matched (Image: {filename}, Match Percentage: {max_val * 100}%)")
+
 
     # Check if there are matched images
     if not matched_images:
         print("No matching images found in the specified folders.")
 
-    # Return the list of matched image paths
-    return matched_images
-def remove_folder(destination_folder):
-# Get a list of all files in the folder
+def delete_data(destination_folder):
+
+    # Get a list of all files in the folder
     files = os.listdir(destination_folder)
 
-# Iterate through the list and remove each file
+    # Iterate through the list and remove each file
     for file in files:
         file_path = os.path.join(destination_folder, file)
         os.remove(file_path)
-        return print("file deleted")
+        return print('delete done')
 
 
-def main():
-    image_path = 'E:/AI/Extra/gitCheck/main/muzzles/co88_2c.jpg'
-    destination_folder = r'E:\AI\Extra\gitCheck\main\testfolder/'
-    root_directory = r"E:\AI\Extra\gitCheck\main\muzzles\destination_folder/"
-    color_result = color_detect(image_path)
-    edge_detected = edge_detect(image_path,destination_folder)
-    match_pattern_in_folders(root_directory,destination_folder)
-    remove_folder(destination_folder)
 
-
-main()
-# Black =  ["co88","co89","co90"]
-# Brown = ["co91","co92"]
-# Pink = ["co93","co94"]
+# Example usage
+root_directory = r"E:\AI\Extra\gitCheck\main\muzzles\destination_folder/"
+image_path = r'E:/AI/Extra/gitCheck/main/muzzles/co88_1c.jpg'
+destination_folder = r'E:\AI\Extra\gitCheck\main\testfolder/'
+color_result = color_detect(image_path)
+edge_detected = edge_detect(image_path,destination_folder)
+match_pattern_and_remove(root_directory, destination_folder)
+delete_data (destination_folder)
