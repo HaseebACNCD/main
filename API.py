@@ -9,8 +9,6 @@ app = Flask(__name__)
 
 
 
-
-
 # DETECTING COLOUR FROM THE IMAGE 
 def color_detect(image_path):
     # Load the image
@@ -27,11 +25,18 @@ def color_detect(image_path):
     rgb_color = (pixel_color[2], pixel_color[1], pixel_color[0])
 
     # Define the ranges for different colors
+    # color_ranges = {
+    #     'Black': ((0, 0, 0), (85, 85, 85)),
+    #     'Brown': ((86, 86, 86), (170, 170, 170)),
+    #     'Pink': ((171, 171, 171), (255, 255, 255))
+    # }
+
     color_ranges = {
-        'Black': ((0, 0, 0), (85, 85, 85)),
-        'Brown': ((86, 86, 86), (170, 170, 170)),
+        'Black': ((0, 0, 0), (150, 150, 150)),
+        # 'Brown': ((86, 86, 86), (170, 170, 170)),
         'Pink': ((171, 171, 171), (255, 255, 255))
     }
+
 
     # Function to calculate Euclidean distance between two points in 3D space
     def euclidean_distance(point1, point2):
@@ -92,6 +97,7 @@ def edge_detect(image_path, destination_folder):
 
 
 def match_template_in_folders(root_folder, destination_folder, color_result, threshold=0.85):
+    matched_info=[]
     # Check if the color is in the colors dictionary
     if color_result is None or color_result not in colors:
         print(f"Error: Invalid or unknown color result.")
@@ -152,7 +158,16 @@ def match_template_in_folders(root_folder, destination_folder, color_result, thr
 
                     # If match is found above the threshold, print the result
                     if max_val >= threshold:
-                        print(f"Pattern matched in folder: {folder_name} (Image: {img_filename}, Match Percentage: {max_val * 100}%)")
+                        # print(f"Pattern matched in folder: {folder_name} (Image: {img_filename}, Match Percentage: {max_val * 100}%)")
+                        match_info = {
+                            "folder_name": folder_name,
+                            "image_name": img_filename,
+                            "match_percentage": max_val * 100
+                        }
+                        matched_info.append(match_info)
+                        # print(match_info)
+
+    return matched_info
 
 # Dictionary of color patterns
 colors = {
@@ -173,4 +188,37 @@ def delete_data(folder_path):
         return 
 
 
+@app.route('/match-template', methods=['GET', 'POST'])
+def api_match_template():
+    try:
+        # Get image_path from the request (support both POST and GET methods)
+        image_path = request.args.get('image_path') or request.json.get('image_path')
 
+        # Specify the root_folder_path and destination_folder
+        root_folder_path = "./muzzles/destination_folder"
+        destination_folder = "./testfolder/"
+
+        # Get the color result from color_detect
+        color_to_search = color_detect(image_path)
+
+        # Perform edge detection
+        edge_image_path = edge_detect(image_path, destination_folder)
+
+        # Call the function to match template in folders of the specified color result
+        # match_template_in_folders(root_folder_path, destination_folder, color_to_search)
+        matched_info = match_template_in_folders(root_folder_path, destination_folder, color_to_search)
+        # Deleting data
+        delete_data(destination_folder)
+
+        # Check if there are matches before returning the response
+        if matched_info:
+            return jsonify({"matches": matched_info})
+        else:
+            return jsonify({"message": "No pattern matches found"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
